@@ -1,0 +1,6 @@
+{
+  "name": "fobilow/mp3file",
+  "require": {
+    "php": ">=5.0.0"
+  }
+}

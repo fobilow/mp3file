@@ -1,6 +1,20 @@
 {
-  "name": "fobilow/Mp3File",
-  "require": {
+  "name":        "fobilow/Mp3File",
+  "description": "php5 class for detecting bitrate and duration of regular mp3 files (not VBR files)",
+  "keywords":    ["mp3", "metadata"],
+  "require":     {
     "php": ">=5.0.0"
+  },
+  "authors":     [
+    {
+      "name":     "Zedwood",
+      "homepage": "http://www.zedwood.com/article/127/php-calculate-duration-of-mp3"
+    },
+    {
+      "name": "Okechukwu Ugwu"
+    }
+  ],
+  "autoload":    {
+    "files": ["Mp3File.php"]
   }
 }

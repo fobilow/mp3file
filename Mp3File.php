@@ -5,7 +5,7 @@ for detecting bitrate and duration of regular mp3 files (not VBR files)
 */
 
 //-----------------------------------------------------------------------------
-class mp3file
+class Mp3File
 {
     protected $block;
     protected $blockpos;
@@ -18,7 +18,7 @@ class mp3file
     {
         $this->powarr  = array(0=>1,1=>2,2=>4,3=>8,4=>16,5=>32,6=>64,7=>128);
         $this->blockmax= 1024;
-        
+
         $this->mp3data = array();
         $this->mp3data['Filesize'] = filesize($filename);
 
@@ -50,16 +50,16 @@ class mp3file
             $this->mp3data['Encoding'] = 'Unknown';
             $iscbrmp3=false;
         }
-    
+
         if ($iscbrmp3)
         {
             $i = 0;
             $max=5000;
-            //look in 5000 bytes... 
+            //look in 5000 bytes...
             //the largest framesize is 4609bytes(256kbps@8000Hz  mp3)
             for($i=0; $i<$max; $i++)
             {
-                //looking for 1111 1111 111 (frame synchronization bits)                
+                //looking for 1111 1111 111 (frame synchronization bits)
                 if ($this->getnextbyte()==0xFF)
                     if ($this->getnextbit() && $this->getnextbit() && $this->getnextbit())
                         break;
@@ -67,7 +67,7 @@ class mp3file
             if ($i==$max)
                 $iscbrmp3=false;
         }
-    
+
         if ($iscbrmp3)
         {
             $this->mp3data['Encoding'         ] = 'CBR';
@@ -83,12 +83,12 @@ class mp3file
             $this->mp3data['Copyright'        ] = $this->getnextbits(1);
             $this->mp3data['Original Media'   ] = $this->getnextbits(1);
             $this->mp3data['Emphasis'         ] = $this->getnextbits(1);
-            $this->mp3data['Bitrate'          ] = mp3file::bitratelookup($this->mp3data);
-            $this->mp3data['Sampling Rate'    ] = mp3file::samplelookup($this->mp3data);
-            $this->mp3data['Frame Size'       ] = mp3file::getframesize($this->mp3data);
-            $this->mp3data['Length'           ] = mp3file::getduration($this->mp3data,$this->tell2());
-            $this->mp3data['Length mm:ss'     ] = mp3file::seconds_to_mmss($this->mp3data['Length']);
-            
+            $this->mp3data['Bitrate'          ] = Mp3File::bitratelookup($this->mp3data);
+            $this->mp3data['Sampling Rate'    ] = Mp3File::samplelookup($this->mp3data);
+            $this->mp3data['Frame Size'       ] = Mp3File::getframesize($this->mp3data);
+            $this->mp3data['Length'           ] = Mp3File::getduration($this->mp3data,$this->tell2());
+            $this->mp3data['Length mm:ss'     ] = Mp3File::seconds_to_mmss($this->mp3data['Length']);
+
             if ($this->mp3data['Bitrate'      ]=='bad'     ||
                 $this->mp3data['Bitrate'      ]=='free'    ||
                 $this->mp3data['Sampling Rate']=='unknown' ||
@@ -130,14 +130,14 @@ class mp3file
                 $this->block[38]==105 && //i 0x69
                 $this->block[39]==110 && //n 0x6E
                 $this->block[40]==103)   //g 0x67
-/*               || 
+/*               ||
                ($this->block[21]==88  && //X 0x58
                 $this->block[22]==105 && //i 0x69
                 $this->block[23]==110 && //n 0x6E
                 $this->block[24]==103)   //g 0x67*/
-              );   
+              );
 
-    } 
+    }
     protected function debugbytes()
     {
         for($j=0; $j<10; $j++)
@@ -212,16 +212,16 @@ class mp3file
         if ($this->bitpos==8)
         {
             $this->blockpos++;
-                
+
             if ($this->blockpos==$this->blockmax) //end of block reached
             {
                 $this->prefetchblock();
             }
-            else if ($this->blockpos==$this->blocksize) 
+            else if ($this->blockpos==$this->blocksize)
             {//end of short block reached (shorter than blockmax)
-                return;//eof 
+                return;//eof
             }
-            
+
             $this->bitpos=0;
         }
         return $b;
@@ -272,22 +272,22 @@ class mp3file
         $array['1101']=array( '416', '320', '256', '224', '144');
         $array['1110']=array( '448', '384', '320', '256', '160');
         $array['1111']=array( 'bad', 'bad', 'bad', 'bad', 'bad');
-        
+
         $whichcolumn=-1;
-        if      (mp3file::is_mpeg10($mp3) && mp3file::is_layer1($mp3) )//V1,L1
+        if      (Mp3File::is_mpeg10($mp3) && Mp3File::is_layer1($mp3) )//V1,L1
             $whichcolumn=0;
-        else if (mp3file::is_mpeg10($mp3) && mp3file::is_layer2($mp3) )//V1,L2
+        else if (Mp3File::is_mpeg10($mp3) && Mp3File::is_layer2($mp3) )//V1,L2
             $whichcolumn=1;
-        else if (mp3file::is_mpeg10($mp3) && mp3file::is_layer3($mp3) )//V1,L3
+        else if (Mp3File::is_mpeg10($mp3) && Mp3File::is_layer3($mp3) )//V1,L3
             $whichcolumn=2;
-        else if (mp3file::is_mpeg20or25($mp3) && mp3file::is_layer1($mp3) )//V2,L1
+        else if (Mp3File::is_mpeg20or25($mp3) && Mp3File::is_layer1($mp3) )//V2,L1
             $whichcolumn=3;
-        else if (mp3file::is_mpeg20or25($mp3) && (mp3file::is_layer2($mp3) || mp3file::is_layer3($mp3)) )
-            $whichcolumn=4;//V2,   L2||L3 
-        
+        else if (Mp3File::is_mpeg20or25($mp3) && (Mp3File::is_layer2($mp3) || Mp3File::is_layer3($mp3)) )
+            $whichcolumn=4;//V2,   L2||L3
+
         if (isset($array[$mp3['Bitrate Index']][$whichcolumn]))
             return $array[$mp3['Bitrate Index']][$whichcolumn];
-        else 
+        else
             return "bad";
     }
     //-----------------------------------------------------------------------------
@@ -299,18 +299,18 @@ class mp3file
         $array['01'] =array('48000','24000','12000');
         $array['10'] =array('32000','16000','8000');
         $array['11'] =array('res','res','res');
-        
+
         $whichcolumn=-1;
-        if      (mp3file::is_mpeg10($mp3))
+        if      (Mp3File::is_mpeg10($mp3))
             $whichcolumn=0;
-        else if (mp3file::is_mpeg20($mp3))
+        else if (Mp3File::is_mpeg20($mp3))
             $whichcolumn=1;
-        else if (mp3file::is_mpeg25($mp3))
+        else if (Mp3File::is_mpeg25($mp3))
             $whichcolumn=2;
-        
+
         if (isset($array[$mp3['Sampling Freq Idx']][$whichcolumn]))
             return $array[$mp3['Sampling Freq Idx']][$whichcolumn];
-        else 
+        else
             return 'unknown';
     }
     //-----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 {
-  "name": "fobilow/mp3file",
+  "name": "fobilow/Mp3File",
   "require": {
     "php": ">=5.0.0"
   }
